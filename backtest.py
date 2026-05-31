@@ -13,6 +13,8 @@ ESLATMA: o'tmishdagi yaxshi natija kelajakni KAFOLATLAMAYDI.
 Lekin yomon backtest = aniq yomon strategiya. Bu birinchi filtr.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 from data import Bar
@@ -180,3 +182,52 @@ def run_backtest(
         trades=trades,
         equity_curve=equity_curve,
     )
+
+
+
+def forward_outcome(
+    bars: list[Bar],
+    entry_index: int,
+    direction: int,
+    stop_loss_pct: float,
+    take_profit_pct: float,
+    max_hold: int = 60,
+) -> int | None:
+    """
+    Bitta setup natijasini OLDINDAN aniqlaydi (kalibrlash uchun ishlatiladi).
+
+    `entry_index` kunining yopilish narxida kiramiz deb faraz qilamiz, keyin
+    keyingi kunlarni kuzatamiz: avval take-profit tegadimi yoki stop-loss?
+
+    Qaytaradi:
+        1    -> YUTUQ (take-profit birinchi tegdi)
+        0    -> ZARAR (stop-loss birinchi tegdi)
+        None -> max_hold ichida hech qaysi tegmadi (natija noaniq, hisobga olinmaydi)
+
+    DIQQAT: agar bir kunning ichida ham TP, ham SL diapazoni bo'lsa, biz
+    EHTIYOTKORLIK bilan ZARAR deb hisoblaymiz (win rate'ni oshirib yubormaslik uchun).
+    """
+    entry_price = bars[entry_index].close
+    if direction == 1:
+        stop = entry_price * (1 - stop_loss_pct)
+        target = entry_price * (1 + take_profit_pct)
+    else:
+        stop = entry_price * (1 + stop_loss_pct)
+        target = entry_price * (1 - take_profit_pct)
+
+    end = min(len(bars), entry_index + 1 + max_hold)
+    for j in range(entry_index + 1, end):
+        bar = bars[j]
+        if direction == 1:
+            hit_stop = bar.low <= stop
+            hit_target = bar.high >= target
+        else:
+            hit_stop = bar.high >= stop
+            hit_target = bar.low <= target
+
+        if hit_stop:          # ehtiyotkorlik: stop birinchi deb hisoblaymiz
+            return 0
+        if hit_target:
+            return 1
+
+    return None  # natija aniqlanmadi

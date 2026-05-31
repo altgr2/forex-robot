@@ -8,6 +8,8 @@ Ikki rejim bor:
   2) REAL ma'lumot — Stooq.com'dan bepul yuklab oladi (internet kerak, API kalit shart emas).
 """
 
+from __future__ import annotations
+
 import csv
 import datetime
 import io
