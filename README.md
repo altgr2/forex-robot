@@ -23,6 +23,7 @@ real pul ishlatilmaydi.
 | `calibrate.py` | 80% ishonch gate'ini topish (train/test bo'linishi bilan)      |
 | `main.py`      | Hammasini birlashtiruvchi asosiy fayl                          |
 | `tune.py`      | Optimizator: eng yaxshi sozlamalarni avtomatik qidirish        |
+| `live_mt5.py`  | Botni MetaTrader 5 ga ulab JONLI ishlatish (avval DEMO!)       |
 
 ## Ishga tushirish
 
@@ -77,3 +78,29 @@ natija**: bu ma'lumotda ishonchli edge yo'q, shuning uchun bot savdo qilmaydi
 - **Win rate (yutuq %)** — savdolarning necha foizi foydali tugagani.
 - **Expectancy ($/savdo)** — har savdoda o'rtacha kutilayotgan foyda. **Eng muhim.**
 - **Max drawdown** — kapital eng yuqori cho'qqidan eng ko'p qancha tushgani.
+
+## Jonli savdo — MetaTrader 5 (faqat DEMO bilan boshlang!)
+
+> ⛔ **AVVAL DEMO AKKAUNT!** Real pul bilan boshlamang. `live_mt5.py` ichida ikkita
+> xavfsizlik qulfi bor: `DRY_RUN = True` (buyurtma yubormaydi, faqat ko'rsatadi) va
+> `ALLOW_REAL_ACCOUNT = False` (real akkauntni rad etadi).
+
+Kerakli qadamlar (Windows):
+
+1. MetaTrader 5 dasturini o'rnating va unda **bepul demo akkaunt** oching.
+2. MT5 dasturi ochiq tursin (demo akkauntga kirilgan).
+3. Python kutubxonasini o'rnating:
+   ```bash
+   pip install MetaTrader5
+   ```
+4. Avval xavfsiz sinov (buyurtma yuborilmaydi):
+   ```bash
+   python live_mt5.py        # DRY_RUN = True bo'lgan holda
+   ```
+5. Hammasi to'g'ri ko'rsatsa, demo'da haqiqiy buyurtma uchun `live_mt5.py` ichida
+   `DRY_RUN = False` qiling (lekin baribir DEMO akkauntda!).
+6. Doimiy ishlash uchun `RUN_FOREVER = True` qiling (kompyuter va MT5 ochiq tursin).
+
+Ishlash mantig'i: bot MT5 dan jonli narx oladi → ishonch balini hisoblaydi →
+ball `MIN_CONFIDENCE` dan oshsa va ochiq savdo bo'lmasa → stop-loss/take-profit
+bilan buyurtma yuboradi. SL/TP ni keyin MT5 o'zi nazorat qiladi.
